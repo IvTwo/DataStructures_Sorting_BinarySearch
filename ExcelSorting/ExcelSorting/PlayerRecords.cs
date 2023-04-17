@@ -48,5 +48,31 @@ namespace ExcelSorting
             }
             return comparison;
         }
+
+        public string GetValueByHeader(string header)
+        {
+            switch (header)
+            {
+                case "User_name":
+                    return User_name;
+                    break;
+
+                case "Game":
+                    return Game;
+                    break;
+
+                case "Weekly_Minutes_Played":
+                    return Weekly_Minutes_Played.ToString();
+                    break;
+
+                case "Weekly_IAP":
+                    return Weekly_IAP.ToString();
+                    break;
+
+                default:
+                    return "";
+                    break;
+            }
+        }
     }
 }

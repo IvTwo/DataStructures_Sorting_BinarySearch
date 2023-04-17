@@ -1,6 +1,7 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
 using System.Globalization;
+using System.Reflection.PortableExecutable;
 
 namespace ExcelSorting
 {
@@ -22,18 +23,106 @@ namespace ExcelSorting
             List<PlayerRecords> recordList = new List<PlayerRecords>(records);
             #endregion
 
-            UserInterface(ref recordList);
-            
+            #region Main UI
+            bool keepGoing = true;
+            while (keepGoing)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Welcome to The Sort/Search Showcase----!");
+                Console.WriteLine();
+                Console.WriteLine("\t1. Sort\n" + "\t2. Search\n" + "\tq = Quit\n");
+
+                switch (UserInput()) // handle user input
+                {
+                    case "1":
+                        SortingUI(ref recordList);
+                        break;
+
+                    case "2":
+
+                        break;
+
+                    case "q":
+                        keepGoing = false;
+                        break;
+
+                    default:
+                        Console.WriteLine("---");
+                        Console.WriteLine("Invalid Input!");
+                        break;
+                }
+            }
+            #endregion
         }
 
-        public static void UserInterface(ref List<PlayerRecords> recordList)
+        // searching
+        public static void SearchingUI(ref List<PlayerRecords> recordList)
         {
             bool keepGoing = true;
             int count = 0;
             while (keepGoing)
             {
                 Console.WriteLine();
-                Console.WriteLine("Welcome to The Gamer Sort----!");
+                Console.WriteLine("Press \"q\" to quit");
+                Console.WriteLine("Find...");
+                string userInput = UserInput();
+                string[] words = userInput.Split(' ');
+
+                int index = 0;
+                string header = "";
+
+                switch (words[0].ToLower())   // handle user input
+                {
+                    case "name":
+                        header = "User_name";
+                        break;
+
+                    case "game":
+                        header = "Game";
+                        break;
+
+                    case "time":
+                        header = "Weekly_Minutes_Player";
+                        break;
+
+                    case "iap":
+                        header = "Weekly_IAP";
+                        break;
+
+                    default:
+                        Console.WriteLine("---");
+                        Console.WriteLine("Invalid Input!");
+                        break;
+                }
+
+                // Find the index of the first record that matches the search query
+                index = BinarySearch_CSV.BinarySearch(recordList, words[1], header);
+
+                // if no records match the querry
+                if (index == -1)
+                {
+                    Console.WriteLine("No matching records found.");
+                    return;
+                }
+                else    // otherwise print the records
+                {
+                    List<PlayerRecords> searchedRecords = new List<PlayerRecords>();
+                    while (index < recordList.Count && recordList[index].GetValueByHeader(header) == words[1])
+                    {
+                        searchedRecords.Add(recordList[index]);
+                    }
+                    PrintRecords(searchedRecords);
+                }
+            }
+        }
+
+        // sorting
+        public static void SortingUI(ref List<PlayerRecords> recordList)
+        {
+            bool keepGoing = true;
+            int count = 0;
+            while (keepGoing)
+            {
                 Console.WriteLine();
                 Console.WriteLine("Press \"q\" to quit");
                 Console.WriteLine("Sort By...");
@@ -76,7 +165,7 @@ namespace ExcelSorting
                         break;
 
                     case "time":
-                        columnArray[1] = "Weekly_Minutes_Played";
+                        columnArray[0] = "Weekly_Minutes_Played";
                         break;
 
                     case "iap":
@@ -140,6 +229,7 @@ namespace ExcelSorting
             Console.WriteLine("-----------------------------------------------------");
         }
 
+        // format for the csv output
         public sealed class PlayerRecordMap : ClassMap<PlayerRecords>
         {
             public PlayerRecordMap()
